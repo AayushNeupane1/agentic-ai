@@ -1,4 +1,6 @@
-## When we say agency is a spectrum, it means that the capacity to make choices, take action, and exert control over your life is not an "all-or-nothing" trait. You do not either completely have it or completely lack it; instead, it exists in degrees that shift constantly based on your environment, internal state, and external constraints.
+## What "agency" means here
+
+In this course, **agency is not about a person's control over their life** — it is a technical idea: *how much control the LLM has over the program's flow.* At one end, the model's output is just text that gets printed. At the other, the model decides which branch runs, which function is called with which arguments, whether to loop again, and even whether to start another agent. "Agency is a spectrum" means that control over execution is handed to the model in increasing degrees across the five levels below.
 
 ### The five levels of agency
 
@@ -38,7 +40,9 @@ Example: A customer-support bot that routes billing questions to billing support
 - It also provides the arguments.
 - Python executes the selected function.
 Example: A fitness assistant choosing between:
-check_membership()log_workout()calculate_calories()
+- check_membership()
+- log_workout()
+- calculate_calories()
 
 The important difference from a router is that the LLM chooses a function to execute, rather than simply selecting between predefined program paths.
 
@@ -65,6 +69,10 @@ Example:
 - Research agent gathers information.
 - Writing agent drafts a report.
 - Review agent checks the report.
+
+### Note: raw Ollama vs smolagents
+
+These five scripts call the model directly with the **raw `ollama` package** (`ollama.chat(...)`) so you can see the mechanics of each level by hand. The Hugging Face course proper builds agents with **smolagents** (`ToolCallingAgent`, `CodeAgent`), which automate levels 2-4 for you — tool-calling, the multi-step loop, and multi-agent coordination. Build these by hand first to understand *what smolagents does under the hood*, then switch to smolagents for real agents.
 
 ### Important things to understand
 

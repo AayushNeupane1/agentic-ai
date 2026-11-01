@@ -75,7 +75,12 @@ for step in range(5):
         ]
     )
 
-    decision = json.loads(response["message"]["content"])
+    try:
+        decision = json.loads(response["message"]["content"])
+    except json.JSONDecodeError:
+        print("Model returned invalid JSON. Raw response:")
+        print(response["message"]["content"])
+        break
 
     action = decision.get("action")
     arguments = decision.get("arguments", {})

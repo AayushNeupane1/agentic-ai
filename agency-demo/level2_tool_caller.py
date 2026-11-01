@@ -70,8 +70,13 @@ response = ollama.chat(
     ]
 )
 
-# Extract LLM decision
-decision = json.loads(response["message"]["content"])
+# Extract LLM decision (guard against invalid JSON from the model)
+try:
+    decision = json.loads(response["message"]["content"])
+except json.JSONDecodeError:
+    print("\nModel returned invalid JSON. Raw response:")
+    print(response["message"]["content"])
+    raise SystemExit
 
 tool_name = decision.get("tool")
 arguments = decision.get("arguments", {})

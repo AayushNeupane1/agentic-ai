@@ -44,14 +44,16 @@ decision = response["message"]["content"].strip().lower()
 
 print("\nLLM DECISION:", decision)
 
-# Python follows the LLM's decision
-if decision == "membership":
+# Python follows the LLM's decision.
+# Use substring matching: a local 7B model may answer "hours." or
+# "Category: hours" instead of the bare word, so == would miss it.
+if "membership" in decision:
     result = membership_info()
 
-elif decision == "hours":
+elif "hour" in decision:
     result = opening_hours()
 
-elif decision == "location":
+elif "location" in decision:
     result = gym_location()
 
 else:
