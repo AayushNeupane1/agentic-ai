@@ -65,3 +65,22 @@ Example:
 - Research agent gathers information.
 - Writing agent drafts a report.
 - Review agent checks the report.
+
+### Important things to understand
+
+1. Why are we using Ollama?
+
+Ollama provides access to your locally running Qwen2:7b model. All five programs use the same model, so you can focus on the differences in program architecture.
+
+2. Why are we using normal Python functions?
+
+Because an agent needs tools to interact with the outside world. Python functions represent those tools in our demonstrations.
+
+3. Are these production-ready agents?
+
+No. These are educational prototypes. They use sample data, simple prompts, and basic error handling. A real system would need stronger input validation, permissions, logging, retries, and evaluation.
+
+4. What if you get a JSON decoding error?
+
+Qwen may occasionally return invalid JSON. Check the raw response before parsing it:
+print(response["message"]["content"])
