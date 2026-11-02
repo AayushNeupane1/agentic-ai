@@ -72,6 +72,40 @@ The same process produces different kinds of output:
 
 **Important:** Even when an LLM makes a decision for an agent, it is still generating tokens. The surrounding Python program interprets that output and performs the action.
 
+### Special tokens & the EOS token
+
+Each LLM has some **special tokens** specific to the model. The LLM uses these tokens to open and close the structured parts of its generation — for example, to mark the start or end of a sequence, message, or response. The prompts we pass in are also structured with special tokens. The most important one is the **End of Sequence token (EOS)**.
+
+The forms of special tokens vary a lot across providers:
+
+| Model | Provider | EOS Token | Functionality |
+|---|---|---|---|
+| GPT-4 | OpenAI | `<\|endoftext\|>` | End of message text |
+| Llama 3 | Meta (FAIR) | `<\|eot_id\|>` | End of sequence |
+| Deepseek-R1 | DeepSeek | `<\|end_of_sentence\|>` | End of message text |
+| SmolLM2 | Hugging Face | `<\|im_end\|>` | End of instruction or message |
+| Gemma | Google | `<end_of_turn>` | End of conversation turn |
+
+You don't need to memorize these — just appreciate their diversity and the role they play. You can find a model's special tokens in its `tokenizer_config.json` on the Hugging Face Hub.
+
+### Autoregressive decoding
+
+LLMs are **autoregressive**: the output from one pass becomes the input for the next. The model generates a token, appends it, and runs again — this loop continues until it predicts the **EOS token**, at which point it stops.
+
+What happens in a single decoding loop (brief, non-technical):
+
+1. The input text is **tokenized**.
+2. The model computes a representation of the sequence that captures the **meaning and position** of each token.
+3. It outputs **scores** ranking how likely each token in its vocabulary is to be next.
+4. A **decoding strategy** picks the next token from those scores.
+
+**Decoding strategies:**
+
+- **Greedy (simplest)** — always take the token with the highest score.
+- **Beam search** — explores multiple candidate sequences and keeps the one with the best *total* score, even if some individual tokens scored lower.
+
+> The HF course shows this as an animation and lets you try it interactively with SmolLM2 in a Space (it decodes until its EOS token, `<|im_end|>`).
+
 ---
 
 ## 3. Built on the Transformer
@@ -100,6 +134,8 @@ Attention helps the model use the surrounding words to understand which meaning 
 Think of attention as the model asking:
 
 > "Which other words in this sentence should I pay attention to understand this word?"
+
+**Context length.** The core principle (predict the next token) has stayed the same since GPT-2; the big advances have been in *scaling* and in making attention work over longer sequences. The **context length** is the maximum number of tokens an LLM can process at once — effectively its maximum attention span. (This is the `num_ctx=8192` you set in `test.py`.)
 
 ### Walking through the Transformer diagram (bottom → top)
 
@@ -194,6 +230,45 @@ The difference is what the surrounding agent program does with the generated out
 
 ---
 
+## 6. Prompting matters
+
+Since an LLM's only job is to predict the next token by looking at every input token and deciding which are "important", the **wording of your input really matters**.
+
+The input sequence you give an LLM is called a **prompt**. Careful prompt design makes it much easier to guide the model toward the output you want.
+
+---
+
+## 7. How LLMs are trained
+
+- **Pre-training** — LLMs are trained on huge text datasets to predict the next word, using a *self-supervised* (or masked language modeling) objective. No human labels are needed — the text itself provides the answer. From this, the model learns the structure of language and generalizes to unseen data.
+- **Fine-tuning** — after pre-training, a model can be trained further on a *supervised* objective for a specific task: conversation, tool use, classification, code generation, and so on.
+
+---
+
+## 8. How can I use an LLM?
+
+Two main options:
+
+1. **Run locally** — if you have sufficient hardware. *(This is what you did: qwen2:7b via Ollama — see `onboarding.md`.)*
+2. **Use a cloud / API** — e.g. the Hugging Face Serverless Inference API.
+
+The HF course mostly uses models via API on the Hub, and explores local runs later — but you've already set up the local route.
+
+---
+
+## 9. How LLMs are used in AI agents
+
+LLMs are a key component of an AI agent — the foundation for understanding and generating language. In an agent, the LLM can:
+
+- Interpret user instructions.
+- Maintain context across a conversation.
+- Define a plan.
+- Decide which tools to use.
+
+This is the bridge into the rest of the course: the LLM (brain) does the thinking; the agent framework gives it tools (body) and runs the loop.
+
+---
+
 ## Key terms (exam)
 
 - **LLM (Large Language Model)** — A model trained on a massive amount of text to understand and generate language. It acts as the brain of an AI agent.
@@ -207,6 +282,13 @@ The difference is what the surrounding agent program does with the generated out
 - **Decoder** — The Transformer component used to generate output.
 - **Softmax** — A function that converts model scores into probabilities.
 - **Multi-Head Attention** — Uses multiple attention mechanisms in parallel to capture different relationships between tokens.
+- **Special tokens** — Model-specific tokens that mark structure (start/end of messages, sequences, etc.).
+- **EOS (End of Sequence) token** — The special token that tells the model to stop generating.
+- **Autoregressive** — Each generated token is fed back as input for the next step, looping until EOS.
+- **Decoding strategy** — How the next token is chosen from the scores (e.g. greedy, beam search).
+- **Context length** — The maximum number of tokens an LLM can process/attend to at once.
+- **Prompt** — The input sequence given to an LLM.
+- **Pre-training / Fine-tuning** — Self-supervised next-word training, then supervised task-specific training.
 
 ## Quick self-check
 
@@ -216,3 +298,7 @@ The difference is what the surrounding agent program does with the generated out
 4. Why do we need positional information? → To help the model understand token order.
 5. Which Transformer type is Qwen2/GPT? → Decoder-only.
 6. What is the difference between the brain and body of an agent? → The LLM (brain) makes decisions; tools and surrounding code (body) execute actions.
+7. How does the model know when to stop generating? → When it predicts the EOS token.
+8. What does "autoregressive" mean? → Each output token becomes part of the next input, looping until EOS.
+9. What is context length? → The maximum number of tokens the model can process at once.
+10. What are the two ways to use an LLM? → Run it locally, or use a cloud/API.
